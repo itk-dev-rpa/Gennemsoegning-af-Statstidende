@@ -1,6 +1,6 @@
 # Gennemsøgning af Statstidende
 
-This robot fetches the newest data from Statstidende.dk and OPUS SAP and checks if any Statstidende cases could be of relevance.
+This robot fetches the newest data from Statstidende.dk, OPUS SAP and KMD Boliglån and checks if any Statstidende cases could be of relevance.
 
 ## How to use certificate
 
