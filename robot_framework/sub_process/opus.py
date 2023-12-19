@@ -1,7 +1,6 @@
 """This module is responsible for reading debitor data from emails in Outlook."""
 
 from io import BytesIO
-import os
 import json
 
 import openpyxl

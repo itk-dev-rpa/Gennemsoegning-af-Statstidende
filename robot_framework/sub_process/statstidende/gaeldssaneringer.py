@@ -44,6 +44,8 @@ def get_birthdate(message: dict[str, Any]) -> str:
                 if field['name'] == 'Fødselsdato':
                     return field['value']
 
+    return None
+
 
 def get_name(message: dict[str, Any]) -> str:
     """Extract the name from a Statstidende message."""
@@ -52,6 +54,8 @@ def get_name(message: dict[str, Any]) -> str:
             for field in field_group['fields']:
                 if field['name'] == 'Navn':
                     return field['value']
+
+    return None
 
 
 def get_case_type(message: dict[str, Any]) -> str:

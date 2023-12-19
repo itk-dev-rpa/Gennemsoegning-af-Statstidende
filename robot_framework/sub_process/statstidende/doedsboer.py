@@ -38,6 +38,8 @@ def get_cpr(message: dict[str, Any]) -> str:
                 if f['name'] == 'CPR-nr.':
                     return f['value']
 
+    return None
+
 
 def get_case_type(message: dict[str, Any]) -> str:
     """Extract the case type from a Statstidende message."""

@@ -40,6 +40,8 @@ def get_cvr(message: dict[str, Any]) -> str:
                 if field['name'] == 'CVR-nr.':
                     return field['value']
 
+    return None
+
 
 def get_case_type(message: dict[str, Any]) -> str:
     """Extract the case type from a Statstidende message."""

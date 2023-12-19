@@ -191,7 +191,7 @@ def get_zipcode(address: str) -> str:
 
     return '9999'
 
-
+# pylint: disable=R0801
 def write_excel(path: str, cases: tuple[tuple[str]]) -> None:
     """Write the given cases to an excel file on the given path.
 
