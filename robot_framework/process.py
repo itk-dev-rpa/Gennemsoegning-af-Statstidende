@@ -46,5 +46,7 @@ def process(orchestrator_connection: OrchestratorConnection) -> None:
         kmd_boliglaan.write_excel(boliglaan_path, boliglaan_cases)
 
     # Send results
+    orchestrator_connection.log_info(f"Sending OPUS email to: {opus_receivers}")
     common.send_email(opus_receivers, opus_name, opus_text, opus_path)
+    orchestrator_connection.log_info(f"Sending Boliglån email to: {boliglaan_receivers}")
     common.send_email(boliglaan_receivers, boliglaan_name, boliglaan_text, boliglaan_path)
