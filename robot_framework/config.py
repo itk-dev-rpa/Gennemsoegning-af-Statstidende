@@ -13,15 +13,15 @@ SCREENSHOT_SENDER = "robot@friend.dk"
 
 # Constant/Credential names
 ERROR_EMAIL = "Error Email"
+STATSTIDENDE_KEY = "Statstidende Key"
+BOLIGLAAN_LOGIN = "Mathias KMD"
+GRAPH_API = "Graph API"
 
+# Argument json names
+EMAIL_TEXT = "email_text"
+OPUS_RECEIVERS = "opus_receivers"
+BOLIGLAAN_RECEIVERS = "boliglaan_receivers"
+CERT_PATH = "cert_path"
 
-# Queue specific configs
-# ----------------------
-
-# The name of the job queue (if any)
-QUEUE_NAME = None
-
-# The limit on how many queue elements to process
-MAX_TASK_COUNT = 100
-
-# ----------------------
+# Where the resulting email comes from
+EMAIL_SENDER = "itk-rpa@mkb.aarhus.dk"
