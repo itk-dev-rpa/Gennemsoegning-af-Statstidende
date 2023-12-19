@@ -39,6 +39,23 @@ def load_debitors_from_emails(orchestrator_connection: OrchestratorConnection):
     return debitors
 
 
+def delete_emails(orchestrator_connection: OrchestratorConnection):
+    """Delete the emails with debitors from Outlook.
+
+    Args:
+        orchestrator_connection: The connection to Orchestrator.
+    """
+    orchestrator_connection.log_info("Deleting OPUS emails")
+
+    graph_creds = orchestrator_connection.get_credential(config.GRAPH_API)
+    graph_access = authentication.authorize_by_username_password(graph_creds.username, **json.loads(graph_creds.password))
+
+    emails = mail.get_emails_from_folder("itk-rpa@mkb.aarhus.dk", "Indbakke/Statstidende/Debitor Udtræk", graph_access)
+    for email in emails:
+        orchestrator_connection.log_info(f"Deleting Email: {email.subject}")
+        mail.delete_email(email, graph_access)
+
+
 def read_sheet(excel_file: BytesIO, debitors: set[str]) -> None:
     """Read an Excel sheet and adds debitors to the given set.
 

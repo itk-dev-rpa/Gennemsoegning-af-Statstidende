@@ -34,6 +34,7 @@ def process(orchestrator_connection: OrchestratorConnection) -> None:
     if not os.path.isfile(opus_path):
         opus_cases = opus.find_relevant_cases(cases, orchestrator_connection)
         opus.write_excel(opus_path, opus_cases)
+        opus.delete_emails()
 
     boliglaan_name = f"Boliglån Statstidende {date}"
     boliglaan_path = boliglaan_name + ".xlsx"
