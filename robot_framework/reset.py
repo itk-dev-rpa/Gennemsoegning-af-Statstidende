@@ -2,6 +2,9 @@
 
 from OpenOrchestrator.orchestrator_connection.connection import OrchestratorConnection
 
+from robot_framework import config
+from robot_framework.sub_process import kmd_boliglaan
+
 
 def reset(orchestrator_connection: OrchestratorConnection) -> None:
     """Clean up, close/kill all programs and start them again. """
@@ -26,7 +29,12 @@ def kill_all(orchestrator_connection: OrchestratorConnection) -> None:
     """Forcefully close all applications used by the robot."""
     orchestrator_connection.log_trace("Killing all applications.")
 
+    kmd_boliglaan.kill_boliglaan()
+
 
 def open_all(orchestrator_connection: OrchestratorConnection) -> None:
     """Open all programs used by the robot."""
     orchestrator_connection.log_trace("Opening all applications.")
+    kmd_login = orchestrator_connection.get_credential(config.BOLIGLAAN_LOGIN)
+
+    kmd_boliglaan.login(kmd_login.username, kmd_login.password)
