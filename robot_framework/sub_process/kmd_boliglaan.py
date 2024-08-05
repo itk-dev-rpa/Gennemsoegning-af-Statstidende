@@ -124,6 +124,9 @@ def read_csv(file_name: str) -> list[tuple[str]]:
             )
             lenders.append(lender)
 
+    if len(lenders) == 0:
+        raise RuntimeError("Found no lenders from KMD Boliglån")
+
     return lenders
 
 
