@@ -50,6 +50,9 @@ def load_statstidende_cases(days: int, orchestrator_connection: OrchestratorConn
                 else:
                     gaeldssaneringer_cases[foedselsdato] = case_list
 
+    if len(doedsboer_cases) == 0 or len(doedsboer_cases) == 0 or len(gaeldssaneringer_cases) == 0 or len(konkursboer_cases) == 0 or len(tvangsauktioner_cases) == 0:
+        raise RuntimeError(f"Got an unexpected number of cases from Statstidende: Dødsboer: {len(doedsboer_cases)}. Gældssaneringer: {len(gaeldssaneringer_cases)}. Konkursboer: {len(konkursboer_cases)}. Tvangsauktioner: {len(tvangsauktioner_cases)}.")
+
     orchestrator_connection.log_info(f'Fra statstidende: Dødsboer: {len(doedsboer_cases)}. Gældssaneringer: {len(gaeldssaneringer_cases)}. Konkursboer: {len(konkursboer_cases)}. Tvangsauktioner: {len(tvangsauktioner_cases)}.')
 
     return (doedsboer_cases, gaeldssaneringer_cases, konkursboer_cases, tvangsauktioner_cases)

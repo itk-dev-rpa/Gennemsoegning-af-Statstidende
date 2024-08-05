@@ -36,6 +36,8 @@ def load_debitors_from_emails(orchestrator_connection: OrchestratorConnection):
         excel_file.close()
 
     orchestrator_connection.log_info(f"Debitore i Opus: {len(debitors)}")
+    if len(debitors) == 0:
+        raise RuntimeError("Found no debitors from OPUS.")
     return debitors
 
 
