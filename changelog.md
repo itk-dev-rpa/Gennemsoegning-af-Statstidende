@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Statstidende certificate moved to Keyvault.
 - Boliglån module uses uiautomation instead of pywinauto.
+- Moved email text from argument to config file.
 
 ### Fixed
 
