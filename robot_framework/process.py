@@ -15,6 +15,8 @@ def process(orchestrator_connection: OrchestratorConnection) -> None:
     """Do the primary process of the robot."""
     orchestrator_connection.log_trace("Running process.")
     arguments = json.loads(orchestrator_connection.process_arguments)
+    opus_receivers = arguments[config.OPUS_RECEIVERS]
+    boliglaan_receivers = arguments[config.BOLIGLAAN_RECEIVERS]
 
     # Load cases from Statstidende
     date = datetime.now().strftime('%d-%m-%Y')
@@ -45,12 +47,10 @@ def process(orchestrator_connection: OrchestratorConnection) -> None:
 
     # Send results
     opus_text = config.EMAIL_TEXT.replace("%SYSTEM%", "OPUS")
-    opus_receivers = arguments[config.OPUS_RECEIVERS]
     orchestrator_connection.log_info(f"Sending OPUS email to: {opus_receivers}")
     common.send_email(opus_receivers, opus_name, opus_text, opus_path)
 
     boliglaan_text = config.EMAIL_TEXT.replace("%SYSTEM%", "KMD Boliglån")
-    boliglaan_receivers = arguments[config.BOLIGLAAN_RECEIVERS]
     orchestrator_connection.log_info(f"Sending Boliglån email to: {boliglaan_receivers}")
     common.send_email(boliglaan_receivers, boliglaan_name, boliglaan_text, boliglaan_path)
 
