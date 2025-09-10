@@ -16,6 +16,7 @@ def process(orchestrator_connection: OrchestratorConnection) -> None:
     orchestrator_connection.log_trace("Running process.")
     arguments = json.loads(orchestrator_connection.process_arguments)
 
+    # Load cases from Statstidende
     date = datetime.now().strftime('%d-%m-%Y')
 
     statstidende_path = f'cases {date}.json'
@@ -26,27 +27,32 @@ def process(orchestrator_connection: OrchestratorConnection) -> None:
     with open(statstidende_path, 'r', encoding='utf-8') as file:
         cases = json.load(file)
 
+    # Load data from OPUS emails and find relevant cases
     opus_name = f"Opus Statstidende {date}"
     opus_path = opus_name + ".xlsx"
-    opus_text = arguments[config.EMAIL_TEXT].replace("%SYSTEM%", "OPUS")
-    opus_receivers = arguments[config.OPUS_RECEIVERS]
 
     if not os.path.isfile(opus_path):
         opus_cases = opus.find_relevant_cases(cases, orchestrator_connection)
         opus.write_excel(opus_path, opus_cases)
-        opus.delete_emails(orchestrator_connection)
 
+    # Load data from Boliglån and find relevant cases
     boliglaan_name = f"Boliglån Statstidende {date}"
     boliglaan_path = boliglaan_name + ".xlsx"
-    boliglaan_text = arguments[config.EMAIL_TEXT].replace("%SYSTEM%", "KMD Boliglån")
-    boliglaan_receivers = arguments[config.BOLIGLAAN_RECEIVERS]
 
     if not os.path.isfile(boliglaan_path):
         boliglaan_cases = kmd_boliglaan.find_relevant_cases(cases, orchestrator_connection)
         kmd_boliglaan.write_excel(boliglaan_path, boliglaan_cases)
 
     # Send results
+    opus_text = config.EMAIL_TEXT.replace("%SYSTEM%", "OPUS")
+    opus_receivers = arguments[config.OPUS_RECEIVERS]
     orchestrator_connection.log_info(f"Sending OPUS email to: {opus_receivers}")
     common.send_email(opus_receivers, opus_name, opus_text, opus_path)
+
+    boliglaan_text = config.EMAIL_TEXT.replace("%SYSTEM%", "KMD Boliglån")
+    boliglaan_receivers = arguments[config.BOLIGLAAN_RECEIVERS]
     orchestrator_connection.log_info(f"Sending Boliglån email to: {boliglaan_receivers}")
     common.send_email(boliglaan_receivers, boliglaan_name, boliglaan_text, boliglaan_path)
+
+    # Delete OPUS emails
+    opus.delete_emails(orchestrator_connection)
