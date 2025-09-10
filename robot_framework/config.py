@@ -18,12 +18,11 @@ GRAPH_API = "Graph API"
 
 KEYVAULT_CREDENTIALS = "Keyvault"
 KEYVAULT_URI = "Keyvault URI"
-KEYVAULT_PATH = ""  # TODO
+KEYVAULT_PATH = "Statstidende"
 
 # Argument json names
 OPUS_RECEIVERS = "opus_receivers"
 BOLIGLAAN_RECEIVERS = "boliglaan_receivers"
-CERT_PATH = "cert_path"
 
 # Where the resulting email comes from
 EMAIL_SENDER = "itk-rpa@mkb.aarhus.dk"
