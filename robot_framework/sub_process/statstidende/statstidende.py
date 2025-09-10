@@ -3,11 +3,10 @@
 from datetime import datetime, timedelta
 import json
 import time
-import os
 
 import requests
-from cryptography.fernet import Fernet
 from OpenOrchestrator.orchestrator_connection.connection import OrchestratorConnection
+from hvac import Client
 
 from robot_framework import config
 from robot_framework.sub_process.statstidende import doedsboer, gaeldssaneringer, konkursboer, tvangsauktioner
@@ -109,25 +108,28 @@ def create_cases_file(path: str, orchestrator_connection: OrchestratorConnection
 
 
 def get_certification_file(orchestrator_connection: OrchestratorConnection) -> str:
-    """Finds the encrypted certificate and decrypts it to the working dir.
+    """Get the certificate from the key vault and write it to a file.
 
     Args:
-        orchestrator_connection: The connection to OpenOrchestrator.
+        orchestrator_connection: The connection to Orchestrator.
 
     Returns:
-        The path to the decrypted file.
+        The path to the certificate file.
     """
-    locked_cert_path = json.loads(orchestrator_connection.process_arguments)[config.CERT_PATH]
-    locked_cert_path = os.path.expanduser(locked_cert_path)
+    # Access Key vault
+    vault_auth = orchestrator_connection.get_credential(config.KEYVAULT_CREDENTIALS)
+    vault_uri = orchestrator_connection.get_constant(config.KEYVAULT_URI).value
+    vault_client = Client(vault_uri)
+    token = vault_client.auth.approle.login(role_id=vault_auth.username, secret_id=vault_auth.password)
+    vault_client.token = token['auth']['client_token']
 
-    crypto_key = orchestrator_connection.get_credential(config.STATSTIDENDE_KEY).password
-    cipher = Fernet(crypto_key)
+    # Get certificate
+    read_response = vault_client.secrets.kv.v2.read_secret_version(mount_point='rpa', path=config.KEYVAULT_PATH, raise_on_deleted_version=True)
+    certificate = read_response['data']['data']['cert']
 
-    unlocked_cert_path = "Certifikat.pem"
+    # Write to file
+    certificate_path = "certificate.pem"
+    with open(certificate_path, 'w', encoding='utf-8') as cert_file:
+        cert_file.write(certificate)
 
-    with open(locked_cert_path, 'rb') as locked_file, open(unlocked_cert_path, 'wb') as unlocked_file:
-        data = locked_file.read()
-        data = cipher.decrypt(data)
-        unlocked_file.write(data)
-
-    return unlocked_cert_path
+    return certificate_path
