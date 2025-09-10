@@ -4,9 +4,9 @@ import csv
 import os
 import time
 import re
-from _ctypes import COMError
 import subprocess
 
+from _ctypes import COMError
 import openpyxl
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from OpenOrchestrator.orchestrator_connection.connection import OrchestratorConnection
