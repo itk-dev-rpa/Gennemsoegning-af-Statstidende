@@ -4,10 +4,8 @@ import csv
 import os
 import time
 import re
-import uuid
 from _ctypes import COMError
 import subprocess
-import os
 
 import openpyxl
 from openpyxl.worksheet.table import Table, TableStyleInfo
@@ -83,7 +81,7 @@ def load_lenders() -> list[tuple[str]]:
         try:
             save_button.GetInvokePattern().Invoke()
             break
-        except:
+        except COMError:
             pass
     else:
         raise TimeoutError("Boliglån result didn't appear after a long time")

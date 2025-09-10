@@ -28,7 +28,7 @@ BOLIGLAAN_RECEIVERS = "boliglaan_receivers"
 EMAIL_SENDER = "itk-rpa@mkb.aarhus.dk"
 
 EMAIL_TEXT = (
-"""Hej
+    """Hej
 
 Her er listen med udsøgning fra Statstidende på debitorer i %SYSTEM% for de sidste 7 dage.
 
