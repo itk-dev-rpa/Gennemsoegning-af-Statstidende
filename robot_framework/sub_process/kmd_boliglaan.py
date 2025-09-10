@@ -4,40 +4,37 @@ import csv
 import os
 import time
 import re
-import uuid
-from _ctypes import COMError
+import subprocess
 
-from pywinauto.application import Application
+from _ctypes import COMError
 import openpyxl
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from OpenOrchestrator.orchestrator_connection.connection import OrchestratorConnection
+import uiautomation
+from itk_dev_shared_components.misc import file_util
 
 from robot_framework.sub_process import common
 
 
 def login(username: str, password: str):
     """Launch and login to KMD Boliglån."""
-    Application(backend="uia").start(r'"C:\Program Files (x86)\KMD\KMD.LW.Boliglaan\KMD.LW.KMDBoliglaan.Client.exe"')
+    subprocess.Popen(r"C:\Program Files (x86)\KMD\KMD.LW.Boliglaan\KMD.LW.KMDBoliglaan.Client.exe")  # pylint: disable=consider-using-with
 
-    app = Application(backend='uia').connect(title="KMD Logon - Brugernavn og kodeord", timeout=30)
-    dlg = app.top_window()
+    kmd_logon = uiautomation.WindowControl(AutomationId="MainLogonWindow", searchDepth=1)
 
-    user_field = dlg.child_window(auto_id="UserPwTextBoxUserName")
-    user_field.set_edit_text(username)
-
-    pass_field = dlg.child_window(auto_id="UserPwPasswordBoxPassword")
-    pass_field.set_edit_text(password)
-
-    # Retry pressing the login button until it works
+    # Wait for logon window to load
     for _ in range(5):
-        try:
-            logon = dlg.child_window(auto_id="UserPwLogonButton")
-            logon.click()
+        if len(kmd_logon.ComboBoxControl(AutomationId="UserPwComboBoxCics").GetSelectionPattern().GetSelection()) == 1:
             break
-        except COMError:
-            time.sleep(1)
-    else:
-        raise RuntimeError("KMD login button didn't work after 5 tries.")
+        time.sleep(1)
+
+    kmd_logon.EditControl(AutomationId="UserPwTextBoxUserName").GetValuePattern().SetValue(username)
+    kmd_logon.EditControl(AutomationId="UserPwPasswordBoxPassword").GetValuePattern().SetValue(password)
+    kmd_logon.ButtonControl(AutomationId="UserPwLogonButton").GetInvokePattern().Invoke()
+
+    boliglaan = uiautomation.WindowControl(Name="KMD Boliglån", searchDepth=1)
+    if not boliglaan.Exists(maxSearchSeconds=30):
+        raise RuntimeError("Boliglån didn't appear within 30 seconds")
 
 
 def load_lenders() -> list[tuple[str]]:
@@ -65,43 +62,37 @@ def load_lenders() -> list[tuple[str]]:
         "Kommune lån §59"
     ]
 
-    app = Application(backend="uia").connect(title="KMD Boliglån", timeout=30)
-    boliglaan = app.top_window()
-    boliglaan.click_input()
-    boliglaan.set_focus()
-    boliglaan.type_keys("^b")
+    # Open search window
+    boliglaan = uiautomation.WindowControl(Name="KMD Boliglån", searchDepth=1)
+    boliglaan.SendKeys("{Ctrl}b")
 
-    laanesager_window = boliglaan.child_window(title="Udsøg lånesager")
-    checkboxes = laanesager_window.descendants(class_name="CheckEdit")
+    # Check boxes and search
+    laanesager_window = boliglaan.WindowControl(Name="Udsøg lånesager", searchDepth=1)
 
-    for checkbox in checkboxes:
-        if checkbox.window_text() in laanestatus+laanetype:
-            if checkbox.get_toggle_state() == 0:
-                checkbox.toggle()
+    for control, _ in uiautomation.WalkControl(laanesager_window):
+        if isinstance(control, uiautomation.CheckBoxControl) and control.Name in laanestatus+laanetype:
+            control.GetTogglePattern().Toggle(waitTime=0)
 
-    laanesager_window.child_window(title="Søg").click()
+    laanesager_window.ButtonControl(Name="Søg").GetInvokePattern().Invoke()
 
-    boliglaan.child_window(auto_id="DockLayoutManager")\
-        .child_window(auto_id="SagerLayoutPanel", found_index=0)\
-        .child_window(title="Save", control_type="Button").click()
+    # Wait for search
+    save_button = boliglaan.GroupControl(AutomationId="SagerLayoutPanel", searchDepth=4).ToolBarControl(AutomationId="Bar").ButtonControl(Name="Save")
+    for _ in range(5):
+        try:
+            save_button.GetInvokePattern().Invoke()
+            break
+        except COMError:
+            pass
+    else:
+        raise TimeoutError("Boliglån result didn't appear after a long time")
 
-    # Create a unique filename in the current working dir
-    file_name = os.path.join(os.getcwd(), f'Lånesager {uuid.uuid4()}.csv')
+    # Save file and read it
+    folder = os.getcwd()
+    path = os.path.join(os.getcwd(), "udtræk.csv")
+    file_util.handle_save_dialog(path)
+    file_util.wait_for_download(folder=folder, file_name="udtræk", file_extension=".csv")
 
-    boliglaan.child_window(title="Gem som")\
-        .child_window(auto_id="FileNameControlHost")\
-        .child_window(auto_id="1001")\
-        .set_edit_text(file_name)
-
-    boliglaan.child_window(title="Gem som")\
-        .child_window(title="Gem")\
-        .click()
-
-    # Wait for boliglån to write file
-    time.sleep(2)
-    data = read_csv(file_name)
-
-    return data
+    return read_csv(path)
 
 
 def read_csv(file_name: str) -> list[tuple[str]]:
@@ -243,3 +234,7 @@ def kill_boliglaan():
     os.system("taskkill /f /im KMD.LW.KMDBoliglaan.Client.exe")
     os.system("taskkill /f /im KMD.YH.Security.Logon.Desktop.exe")
     os.system("taskkill /f /im notepad*")
+
+
+if __name__ == '__main__':
+    print(len(load_lenders()))
