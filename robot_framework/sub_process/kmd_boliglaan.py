@@ -76,7 +76,7 @@ def load_lenders() -> list[tuple[str]]:
     laanesager_window.ButtonControl(Name="Søg").GetInvokePattern().Invoke()
 
     # Wait for search
-    save_button = boliglaan.GroupControl(AutomationId="SagerLayoutPanel", searchDepth=4).ToolBarControl(AutomationId="Bar").ButtonControl(Name="Save")
+    save_button = boliglaan.GroupControl(AutomationId="SagerLayoutPanel", searchDepth=4).ButtonControl(Name="Save", searchDepth=3)
     for _ in range(5):
         try:
             save_button.GetInvokePattern().Invoke()
@@ -91,6 +91,7 @@ def load_lenders() -> list[tuple[str]]:
     path = os.path.join(os.getcwd(), "udtræk.csv")
     file_util.handle_save_dialog(path)
     file_util.wait_for_download(folder=folder, file_name="udtræk", file_extension=".csv")
+    time.sleep(2)  # An extra wait for the file to be ready
 
     return read_csv(path)
 
@@ -101,7 +102,7 @@ def read_csv(file_name: str) -> list[tuple[str]]:
     """
     lenders = []
     with open(file_name, encoding='ansi') as file:
-        # Skip first 12 rows (Meta date)
+        # Skip first 12 rows (Meta data)
         for _ in range(12):
             next(file)
 
