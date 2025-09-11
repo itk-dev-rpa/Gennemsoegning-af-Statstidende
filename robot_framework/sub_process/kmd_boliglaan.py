@@ -76,7 +76,7 @@ def load_lenders() -> list[tuple[str]]:
     laanesager_window.ButtonControl(Name="Søg").GetInvokePattern().Invoke()
 
     # Wait for search
-    save_button = boliglaan.GroupControl(AutomationId="SagerLayoutPanel", searchDepth=4).ToolBarControl(AutomationId="Bar").ButtonControl(Name="Save")
+    save_button = boliglaan.GroupControl(AutomationId="SagerLayoutPanel", searchDepth=4).ButtonControl(Name="Save", searchDepth=3)
     for _ in range(5):
         try:
             save_button.GetInvokePattern().Invoke()
