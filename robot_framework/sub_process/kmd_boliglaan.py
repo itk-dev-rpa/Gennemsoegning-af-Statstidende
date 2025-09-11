@@ -81,7 +81,7 @@ def load_lenders() -> list[tuple[str]]:
         try:
             save_button.GetInvokePattern().Invoke()
             break
-        except COMError:
+        except (AttributeError, COMError):
             pass
     else:
         raise TimeoutError("Boliglån result didn't appear after a long time")
