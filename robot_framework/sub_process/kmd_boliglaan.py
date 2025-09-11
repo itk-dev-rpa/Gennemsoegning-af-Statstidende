@@ -6,6 +6,7 @@ import time
 import re
 import subprocess
 
+from _ctypes import COMError
 import openpyxl
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from OpenOrchestrator.orchestrator_connection.connection import OrchestratorConnection
@@ -80,7 +81,7 @@ def load_lenders() -> list[tuple[str]]:
         try:
             save_button.GetInvokePattern().Invoke()
             break
-        except Exception:
+        except (AttributeError, COMError):
             pass
     else:
         raise TimeoutError("Boliglån result didn't appear after a long time")
