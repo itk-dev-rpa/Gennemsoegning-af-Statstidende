@@ -91,7 +91,7 @@ def load_lenders() -> list[tuple[str]]:
     path = os.path.join(os.getcwd(), "udtræk.csv")
     file_util.handle_save_dialog(path)
     file_util.wait_for_download(folder=folder, file_name="udtræk", file_extension=".csv")
-    time.sleep(2) # An extra wait for the file to be ready
+    time.sleep(2)  # An extra wait for the file to be ready
 
     return read_csv(path)
 
