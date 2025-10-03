@@ -5,6 +5,7 @@ import os
 import json
 
 from OpenOrchestrator.orchestrator_connection.connection import OrchestratorConnection
+import itk_dev_event_log
 
 from robot_framework import config
 from robot_framework.sub_process import common, opus, kmd_boliglaan
@@ -18,6 +19,9 @@ def process(orchestrator_connection: OrchestratorConnection) -> None:
     opus_receivers = arguments[config.OPUS_RECEIVERS]
     boliglaan_receivers = arguments[config.BOLIGLAAN_RECEIVERS]
 
+    event_log = orchestrator_connection.get_constant("Event Log")
+    itk_dev_event_log.setup_logging(event_log.value)
+
     # Load cases from Statstidende
     date = datetime.now().strftime('%d-%m-%Y')
 
@@ -28,6 +32,7 @@ def process(orchestrator_connection: OrchestratorConnection) -> None:
 
     with open(statstidende_path, 'r', encoding='utf-8') as file:
         cases = json.load(file)
+    itk_dev_event_log.emit(orchestrator_connection.process_name, "Cases created", len(cases))
 
     # Load data from OPUS emails and find relevant cases
     opus_name = f"Opus Statstidende {date}"
@@ -35,6 +40,7 @@ def process(orchestrator_connection: OrchestratorConnection) -> None:
 
     if not os.path.isfile(opus_path):
         opus_cases = opus.find_relevant_cases(cases, orchestrator_connection)
+        itk_dev_event_log.emit(orchestrator_connection.process_name, "Opus cases found", len(opus_cases))
         opus.write_excel(opus_path, opus_cases)
 
     # Load data from Boliglån and find relevant cases
@@ -43,6 +49,7 @@ def process(orchestrator_connection: OrchestratorConnection) -> None:
 
     if not os.path.isfile(boliglaan_path):
         boliglaan_cases = kmd_boliglaan.find_relevant_cases(cases, orchestrator_connection)
+        itk_dev_event_log.emit(orchestrator_connection.process_name, "Boliglån cases found", len(boliglaan_cases))
         kmd_boliglaan.write_excel(boliglaan_path, boliglaan_cases)
 
     # Send results
