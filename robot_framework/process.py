@@ -5,6 +5,7 @@ import os
 import json
 
 from OpenOrchestrator.orchestrator_connection.connection import OrchestratorConnection
+import itk_dev_event_log
 
 from robot_framework import config
 from robot_framework.sub_process import common, opus, kmd_boliglaan
@@ -17,6 +18,9 @@ def process(orchestrator_connection: OrchestratorConnection) -> None:
     arguments = json.loads(orchestrator_connection.process_arguments)
     opus_receivers = arguments[config.OPUS_RECEIVERS]
     boliglaan_receivers = arguments[config.BOLIGLAAN_RECEIVERS]
+
+    event_log = orchestrator_connection.get_constant("Event Log")
+    itk_dev_event_log.setup_logging(event_log.value)
 
     # Load cases from Statstidende
     date = datetime.now().strftime('%d-%m-%Y')
@@ -56,3 +60,7 @@ def process(orchestrator_connection: OrchestratorConnection) -> None:
 
     # Delete OPUS emails
     opus.delete_emails(orchestrator_connection)
+
+    itk_dev_event_log.emit(orchestrator_connection.process_name, "Cases loaded from Statstidende", len(cases))
+    itk_dev_event_log.emit(orchestrator_connection.process_name, "Opus cases found", len(opus_cases))
+    itk_dev_event_log.emit(orchestrator_connection.process_name, "Boliglån cases found", len(boliglaan_cases))
