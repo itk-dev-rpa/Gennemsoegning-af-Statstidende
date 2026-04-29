@@ -235,7 +235,3 @@ def kill_boliglaan():
     os.system("taskkill /f /im KMD.LW.KMDBoliglaan.Client.exe")
     os.system("taskkill /f /im KMD.YH.Security.Logon.Desktop.exe")
     os.system("taskkill /f /im notepad*")
-
-
-if __name__ == '__main__':
-    print(len(load_lenders()))
