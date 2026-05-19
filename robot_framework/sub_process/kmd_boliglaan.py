@@ -24,8 +24,11 @@ def login(username: str, password: str):
 
     # Wait for logon window to load
     for _ in range(5):
-        if len(kmd_logon.ComboBoxControl(AutomationId="UserPwComboBoxCics").GetSelectionPattern().GetSelection()) == 1:
-            break
+        try:
+            if len(kmd_logon.ComboBoxControl(AutomationId="UserPwComboBoxCics").GetSelectionPattern().GetSelection()) == 1:
+                break
+        except LookupError:
+            pass
         time.sleep(1)
 
     kmd_logon.EditControl(AutomationId="UserPwTextBoxUserName").GetValuePattern().SetValue(username)
